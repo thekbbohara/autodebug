@@ -4,8 +4,8 @@ description: Autonomous never-stop debugging loop — scans entire repo for bugs
 triggers: ["/autodebug"]
 tools: [mcp__jcodemunch__index_folder, mcp__jcodemunch__resolve_repo, mcp__jcodemunch__get_repo_health, mcp__jcodemunch__get_repo_outline, mcp__jcodemunch__suggest_queries, mcp__jcodemunch__find_dead_code, mcp__jcodemunch__get_dead_code_v2, mcp__jcodemunch__get_hotspots, mcp__jcodemunch__get_dependency_cycles, mcp__jcodemunch__get_layer_violations, mcp__jcodemunch__get_coupling_metrics, mcp__jcodemunch__search_text, mcp__jcodemunch__search_symbols, mcp__jcodemunch__get_file_outline, mcp__jcodemunch__get_symbol_source, mcp__jcodemunch__get_symbol_complexity, mcp__jcodemunch__get_call_hierarchy, mcp__jcodemunch__get_blast_radius, mcp__jcodemunch__get_class_hierarchy, mcp__jcodemunch__get_file_content, mcp__jcodemunch__find_importers, mcp__jcodemunch__find_references, mcp__jcodemunch__check_references, mcp__jcodemunch__get_context_bundle, mcp__jcodemunch__plan_turn, mcp__jcodemunch__register_edit, mcp__mysql__mysql_query, Read, Write, Edit, Bash, Glob, Grep, GetDiagnostics, SleepTimer, TaskCreate, TaskUpdate, TaskList, Skill]
 when-to-use: Use when user says "/autodebug", "autodebug", "run autodebug", "debug entire repo", "find all bugs". User can optionally specify focus areas as arguments.
-argument-hint: [focus: security|performance|db|dead-code|all] [scope: path-or-all]
-arguments: [focus, scope]
+argument-hint: [focus: security|performance|db|dead-code|all] [scope: path-or-all] [write-testcase]
+arguments: [focus, scope, write_testcase]
 context: inline
 ---
 
@@ -17,6 +17,7 @@ Scan the current repo (or $SCOPE) continuously for bugs, security issues, perfor
 ## ARGUMENTS
 - $FOCUS — What to focus on: `security`, `performance`, `db`, `dead-code`, or `all` (default: `all`)
 - $SCOPE — Path to scan (default: current working directory)
+- $WRITE_TESTCASE — If `write-testcase` is passed, generate production-grade test cases for every finding. Read `testrules.md` for full test writing rules.
 
 ## SETUP (do this FIRST — always)
 
@@ -30,6 +31,7 @@ Scan the current repo (or $SCOPE) continuously for bugs, security issues, perfor
    - Current phase and iteration number
    - Files scanned so far
    - This file is your SOURCE OF TRUTH after context compaction
+5. **If $WRITE_TESTCASE is passed**: Read `skills/testrules.md` (or `.cheetahclaws/skills/testrules.md`) in full. This file contains ALL rules for writing production-grade test cases. You MUST follow those rules for every test you write. Before writing any test, complete Step 0 from testrules.md: discover the repo's existing test patterns by scanning test directories, reading existing test files, and extracting the framework, naming, structure, mocking strategy, and assertion style used.
 
 ## OUTPUT FORMAT (MANDATORY — every .md file MUST follow this)
 
@@ -122,15 +124,34 @@ Scan the current repo (or $SCOPE) continuously for bugs, security issues, perfor
 - Set SleepTimer for 300 seconds (5 minutes)
 - When timer fires, START OVER from Phase 1
 
+### Phase 11: WRITE TEST CASES (only if $WRITE_TESTCASE is passed)
+- This phase runs AFTER all other phases complete each iteration
+- **Read `skills/testrules.md`** — it contains the complete rules for writing production-grade tests
+- Before writing ANY test, complete Step 0 from testrules.md:
+  1. `get_file_tree` with `path_prefix="tests/"` or `path_prefix="__tests__/"` — discover test directory structure
+  2. `get_file_outline` on 3-5 existing test files — extract framework, naming, structure
+  3. `get_symbol_source` on representative test functions — understand mocking, assertions, fixtures
+  4. Record the discovered patterns in `.loop_state` so you don't re-discover after compaction
+- For EACH finding written in phases 2-9, write a companion test file:
+  - `001-security-sql-injection.md` → `001-security-sql-injection.test.py` (or `.test.ts`, etc.)
+  - Test must reproduce the exact bug found
+  - Test must FAIL if the bug is present, PASS after fix
+  - Follow the repo's existing test patterns (framework, naming, structure, mocking)
+  - If NO existing tests found, use language defaults from testrules.md §0.3
+  - Every test file gets the standard header from testrules.md §3.3
+- Write tests to `debug_output/` alongside the finding .md files
+- If the finding .md file already has a companion `.test.*` file, skip it (already covered)
+- Never write tests for findings you haven't confirmed through source code analysis
+
 ## FOCUS MODE PHASE MAP
 
 | Focus | Phases |
 |-------|--------|
-| `all` | 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 |
-| `security` | 1, 5, 7 |
-| `performance` | 1, 3, 8, 9 |
-| `db` | 1, 9 |
-| `dead-code` | 1, 2, 4 |
+| `all` | 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, [11 if write-testcase] |
+| `security` | 1, 5, 7, [11 if write-testcase] |
+| `performance` | 1, 3, 8, 9, [11 if write-testcase] |
+| `db` | 1, 9, [11 if write-testcase] |
+| `dead-code` | 1, 2, 4, [11 if write-testcase] |
 
 ## CRITICAL RULES
 

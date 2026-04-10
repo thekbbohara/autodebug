@@ -15,14 +15,15 @@
 
 AutoDebug is a **CheetahClaws skill** that runs an autonomous, infinite debugging loop on any repository. It scans for bugs, security vulnerabilities, performance issues, dead code, and slow database queries — then writes structured findings you can act on.
 
-**It never stops.** It loops through 10 scan phases, sleeps, then starts over. Kill it when you're done.
+**It never stops.** It loops through 11 scan phases, sleeps, then starts over. Kill it when you're done.
 
 ## Features
 
-- 🔍 **10-phase deep scan** — recon, dead code, hotspots, dependencies, security, logic bugs, type safety, performance, DB scan, regression check
+- 🔍 **11-phase deep scan** — recon, dead code, hotspots, dependencies, security, logic bugs, type safety, performance, DB scan, regression check, test case generation
 - 🔁 **Infinite loop** — keeps scanning until you kill it
 - 💾 **Context-compaction proof** — writes state to disk, survives AI memory loss
 - 📄 **Structured output** — every finding in `debug_output/*.md` with `# Issue` / `# Solution` format
+- 🧪 **Test case generation** — pass `write-testcase` to auto-generate production-grade regression tests for every finding
 - 🗄️ **Database scanning** — MySQL integration (read-only) for missing indexes, oversized tables, bad collations
 - 🔌 **jCodemunch MCP** — indexed code analysis, not raw grep
 - ⚡ **Focus modes** — `security`, `performance`, `db`, `dead-code`, or `all`
@@ -42,9 +43,10 @@ AutoDebug is a **CheetahClaws skill** that runs an autonomous, infinite debuggin
 git clone https://github.com/YOUR_USERNAME/autodebug.git
 cd autodebug
 
-# Copy the skill to your CheetahClaws skills directory
+# Copy the skill and test rules
 mkdir -p ~/.cheetahclaws/skills
 cp skills/autodebug.md ~/.cheetahclaws/skills/autodebug.md
+cp skills/testrules.md ~/.cheetahclaws/skills/testrules.md
 
 # Copy the autonomous tooling
 mkdir -p ~/.cheetahclaws/autonomous
@@ -60,6 +62,8 @@ cp scripts/repo_audit.py ~/.cheetahclaws/autonomous/repo_audit.py
 /autodebug performance /path/to/repo    # Performance focus on specific repo
 /autodebug db                           # Database scanning only
 /autodebug dead-code                    # Dead code analysis only
+/autodebug all . write-testcase         # Full scan + generate regression tests
+/autodebug security write-testcase      # Security scan + security test cases
 ```
 
 ## Output Format
@@ -95,6 +99,7 @@ Every finding is written to `debug_output/NNN-category-title.md`:
 | 8 | Performance | N+1 queries, sync blocking, memory leaks, unbounded arrays |
 | 9 | DB Scan | Missing indexes, oversized tables, wrong collations, bad data types |
 | 10 | Regression | Re-scan, sleep 5 min, loop back to Phase 1 |
+| 11 | Test Cases | Auto-generate production-grade regression tests for every finding (requires `write-testcase` flag) |
 
 ## How It Survives Context Compaction
 
@@ -109,7 +114,8 @@ AI agents have limited context windows. When context fills up, older messages ar
 ```
 autodebug/
 ├── skills/
-│   └── autodebug.md          # The CheetahClaws skill definition
+│   ├── autodebug.md          # The CheetahClaws skill definition
+│   └── testrules.md          # Production-grade test writing rules (loaded by Phase 11)
 ├── scripts/
 │   ├── runner.py             # Autonomous task persistence (survives compaction)
 │   └── repo_audit.py         # Structured audit with finding tracking
@@ -138,11 +144,40 @@ You can modify `skills/autodebug.md` to add, remove, or reorder scan phases. See
 
 | Focus | Phases Run |
 |-------|-----------|
-| `all` (default) | All 10 phases |
-| `security` | 1, 5, 7 |
-| `performance` | 1, 3, 8, 9 |
-| `db` | 1, 9 |
-| `dead-code` | 1, 2, 4 |
+| `all` (default) | All 10 phases, +11 if `write-testcase` |
+| `security` | 1, 5, 7, +11 if `write-testcase` |
+| `performance` | 1, 3, 8, 9, +11 if `write-testcase` |
+| `db` | 1, 9, +11 if `write-testcase` |
+| `dead-code` | 1, 2, 4, +11 if `write-testcase` |
+
+## Test Case Generation
+
+Pass `write-testcase` as the third argument to auto-generate production-grade regression tests for every finding:
+
+```
+/autodebug all . write-testcase         # Full scan + test cases
+/autodebug security . write-testcase    # Security scan + security tests
+```
+
+### How It Works
+
+1. **Phase 11** scans the repo's existing test patterns first — framework, naming, structure, mocking strategy
+2. If the repo has existing tests, new tests follow the same conventions
+3. If no tests exist, it picks the best default for the language (pytest for Python, Jest for TS, etc.)
+4. For every finding (`001-security-sql-injection.md`), a companion test is written (`001-security-sql-injection.test.py`)
+5. Tests reproduce the exact bug — they **fail** if the bug is present, **pass** after the fix
+
+### Test Quality Rules
+
+All generated tests follow the rules in `skills/testrules.md`:
+
+- **Deterministic** — no random, no network, no `datetime.now()`
+- **Isolated** — no shared mutable state between tests
+- **Fast** — unit tests < 100ms, integration < 5s
+- **Named by behavior** — `test_user_login_with_invalid_password_returns_401`, not `testFunction1`
+- **AAA pattern** — Arrange, Act, Assert
+- **Negative cases** — every happy path test has a failure counterpart
+- **Minimal mocking** — only mock external deps, never business logic
 
 ## Contributing
 
