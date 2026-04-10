@@ -17,13 +17,15 @@ Add a new phase to `skills/autodebug.md` following the existing format. Each pha
 - Specify which jcodemunch/mysql tools it uses
 - Define what patterns it looks for
 - State which focus modes include it
+- Be added to `scripts/repo_audit.py` `init_audit` phases dict
+- Be added to `scripts/test_skill.py` `test_required_sections`
 
 ### Improved Detection Rules
 The severity guide and pattern lists in the skill file are meant to evolve. If you find new patterns worth scanning for, add them.
 
 ### Tooling Improvements
 - `scripts/runner.py` — task persistence and state tracking
-- `scripts/repo_audit.py` — structured finding management
+- `scripts/repo_audit.py` — structured finding management with dedup, ignore list, snapshots, and diffing
 
 ### Documentation
 - New guides in `docs/`
@@ -43,7 +45,16 @@ Run the validation script:
 python3 scripts/test_skill.py
 ```
 
-This verifies the skill file parses correctly and all referenced tools exist.
+This validates:
+- Skill file parses correctly with all 6 arguments
+- All 23 required sections present (13 phases + Issue/Solution + compaction recovery + testrules + dedup + ignore + severity + notifications + incremental + parallel)
+- Testrules file parses correctly with all 8 steps
+- repo_audit.py has all 13 phases
+- repo_audit.py deduplication works
+- repo_audit.py ignore list works
+- repo_audit.py snapshot and diff work
+- repo_audit.py min-severity filter works
+- Focus mode phase map is complete
 
 ## PR Process
 
@@ -51,3 +62,4 @@ This verifies the skill file parses correctly and all referenced tools exist.
 2. Keep PRs focused — one feature per PR
 3. Include a clear description of what changed and why
 4. If adding a new scan phase, document which focus modes include it
+5. If adding new arguments, update `test_skill.py` to verify them

@@ -17,7 +17,9 @@ AutoDebug's scan phases are defined in `skills/autodebug.md`. You can customize 
 ```
 
 4. Update the `## FOCUS MODE PHASE MAP` table to include your phase in the relevant focus modes
-5. Update the phase number in Phase 10 (REGRESSION CHECK) so it loops correctly
+5. Update the phase number in Phase 12 (REGRESSION CHECK) so it loops correctly
+6. Update `scripts/repo_audit.py` `init_audit` to include the new phase
+7. Update `scripts/test_skill.py` `test_required_sections` to include the new phase name
 
 ## Removing a Phase
 
@@ -25,28 +27,36 @@ AutoDebug's scan phases are defined in `skills/autodebug.md`. You can customize 
 2. Renumber subsequent phases
 3. Update the focus mode table
 4. Update the regression phase number
+5. Update `scripts/repo_audit.py` and `scripts/test_skill.py`
 
-## Example: Adding a Docker Scan Phase
+## Current Phase List
+
+| Phase | Name |
+|-------|------|
+| 1 | RECON |
+| 2 | DEAD CODE |
+| 3 | HOTSPOTS |
+| 4 | DEPENDENCIES |
+| 5 | SECURITY SCAN |
+| 6 | LOGIC BUGS |
+| 7 | TYPE SAFETY |
+| 8 | PERFORMANCE |
+| 9 | DB SCAN |
+| 10 | API CONTRACT SCAN |
+| 11 | DOCKER SCAN |
+| 12 | REGRESSION CHECK |
+| 13 | WRITE TEST CASES |
+
+## Example: Adding a Kubernetes Scan Phase
 
 ```
-### Phase 9.5: DOCKER
-- `search_text` for: `latest`, `ADD .`, `sudo`, `chmod 777`
-- `get_file_content` for Dockerfiles and docker-compose files
-- Check for: running as root, no health checks, untagged images, exposed ports
-- Write each finding as a separate .md file with `category: security`
-- Skip if $FOCUS is `dead-code` or `performance`
-```
-
-## Example: Adding a API Contract Phase
-
-```
-### Phase 9.5: API_CONTRACT
-- `search_text` for: `@route`, `@app.route`, `router.`, `app.get`, `app.post`
-- `get_symbol_source` on route handler functions
-- Check for: missing input validation, missing auth decorators, no rate limiting
-- Check for: inconsistent response shapes, missing error responses
-- Write findings
-- Skip if $FOCUS is `dead-code` or `db`
+### Phase 11.5: KUBERNETES SCAN
+- `search_text` for: `apiVersion:|kind:|metadata:|spec:` in *.yaml files
+- `get_file_content` for kubernetes manifest files
+- Check for: running as root, no resource limits, hostPath mounts, privileged containers
+- Check for: no liveness/readiness probes, latest image tags, no network policies
+- Write findings with `category: docker`
+- Skip if $FOCUS is `performance`, `dead-code`, or `db`
 ```
 
 ## Testing Your Changes
@@ -57,4 +67,4 @@ After modifying the skill file, run the validation script:
 python3 scripts/test_skill.py
 ```
 
-This checks that the skill file parses correctly and all required sections are present. You may need to update `test_skill.py` to include your new phase in the `required_sections` list.
+This checks that the skill file parses correctly and all required sections are present. You may need to update `test_skill.py` to include your new phase in the `required_sections` list and update `repo_audit.py` to include the new phase in `init_audit`.

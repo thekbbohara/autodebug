@@ -1,0 +1,56 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "subject": "Fix repo_audit.py \u2014 add phases 10-13, dedup, ignore, snapshot, diff, min-severity",
+      "description": "Bug 1: Add missing phases (10-13). Bug 2: Dedup in add_finding. Feature 1: min-severity filter. Feature 2: ignore/unignore. Feature 4: snapshot/diff.",
+      "status": "completed",
+      "active_form": "Updating repo_audit.py",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T00:25:37.775777",
+      "updated_at": "2026-04-11T00:28:35.420393"
+    },
+    {
+      "id": "2",
+      "subject": "Rewrite autodebug.md \u2014 all new features, phases, arguments",
+      "description": "Add new arguments, new phases (API contract, Docker), dedup rules, ignore list, notifications, incremental indexing, parallel mode, updated phase numbers and focus map.",
+      "status": "completed",
+      "active_form": "Rewriting autodebug.md skill",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T00:25:37.776580",
+      "updated_at": "2026-04-11T00:35:09.076747"
+    },
+    {
+      "id": "3",
+      "subject": "Update test_skill.py \u2014 new phases, new repo_audit commands",
+      "description": "Add Phase 10-13 to required_sections, add tests for repo_audit.py new commands (ignore, unignore, snapshot, diff, dedup, min-severity).",
+      "status": "completed",
+      "active_form": "Updating test_skill.py",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T00:25:37.777262",
+      "updated_at": "2026-04-11T00:40:12.770222"
+    },
+    {
+      "id": "4",
+      "subject": "Update CHEETAHCLAWS.md and README.md",
+      "description": "Update project context and docs to reflect all bug fixes and new features.",
+      "status": "completed",
+      "active_form": "Updating documentation",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T00:25:37.777938",
+      "updated_at": "2026-04-11T00:50:40.595024"
+    }
+  ]
+}
