@@ -11,7 +11,7 @@ This file is read by CheetahClaws at the start of every session. It contains eve
 - **License**: MIT (SAIL Lab, UC Berkeley)
 - **Repo**: `/home/kb-26/autodebug`
 - **Type**: CheetahClaws skill package (not a standalone app)
-- **Status**: v0.3 — all bugs fixed, all features implemented
+- **Status**: v0.5 — business logic discovery phase added
 
 ## What AutoDebug Does
 

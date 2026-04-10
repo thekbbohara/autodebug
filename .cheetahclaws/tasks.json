@@ -51,6 +51,58 @@
       "metadata": {},
       "created_at": "2026-04-11T00:25:37.777938",
       "updated_at": "2026-04-11T00:50:40.595024"
+    },
+    {
+      "id": "5",
+      "subject": "Add Phase 0: BUSINESS LOGIC DISCOVERY to autodebug.md",
+      "description": "Add a new Phase 0 that runs before all other phases. It discovers business logic by analyzing code structure, naming, data models, and flows. It then presents a Business Logic Summary + Questions to the user for confirmation. Only after confirmation does the scan proceed. Phase 6 (LOGIC BUGS) now uses confirmed business logic to find real logic bugs instead of just mechanical patterns.",
+      "status": "completed",
+      "active_form": "",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T01:19:32.317323",
+      "updated_at": "2026-04-11T01:28:46.433116"
+    },
+    {
+      "id": "6",
+      "subject": "Add phase 0_business_logic to repo_audit.py",
+      "description": "Add '0_business_logic' phase to repo_audit.py init_audit phases dict. Renumber all phases or keep 0 as pre-phase.",
+      "status": "completed",
+      "active_form": "",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T01:19:47.408589",
+      "updated_at": "2026-04-11T01:21:54.040876"
+    },
+    {
+      "id": "7",
+      "subject": "Update test_skill.py for Phase 0",
+      "description": "Update test_skill.py: add Phase 0 to required sections, update phase count from 13 to 14",
+      "status": "completed",
+      "active_form": "",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T01:20:08.246016",
+      "updated_at": "2026-04-11T01:30:28.630422"
+    },
+    {
+      "id": "8",
+      "subject": "Add BUSINESS LOGIC DISCOVERY section + update Phase 6 + mission rules",
+      "description": "Add '## BUSINESS LOGIC DISCOVERY' section to autodebug.md explaining the full workflow. Also update Phase 6 to reference confirmed business logic. Update SETUP step ordering. Update MISSION to allow pause for business logic confirmation. Update focus mode phase map to include Phase 0.",
+      "status": "completed",
+      "active_form": "",
+      "owner": "",
+      "blocks": [],
+      "blocked_by": [],
+      "metadata": {},
+      "created_at": "2026-04-11T01:20:17.276663",
+      "updated_at": "2026-04-11T01:28:53.273643"
     }
   ]
 }

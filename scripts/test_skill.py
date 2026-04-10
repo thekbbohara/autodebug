@@ -40,12 +40,15 @@ def test_skill_file_parses():
     assert "min_severity" in fields.get("arguments", ""), "Missing min_severity argument"
     assert "webhook_url" in fields.get("arguments", ""), "Missing webhook_url argument"
     assert "parallel" in fields.get("arguments", ""), "Missing parallel argument"
+    assert "target" in fields.get("arguments", ""), "Missing target argument"
+    assert "discover_logic" in fields.get("arguments", ""), "Missing discover_logic argument"
     print(f"PASS: Skill file parses correctly (name={fields['name']})")
 
 
 def test_required_sections():
     text = SKILL_FILE.read_text()
     required = [
+        "Phase 0: BUSINESS LOGIC DISCOVERY",
         "Phase 1: RECON",
         "Phase 2: DEAD CODE",
         "Phase 3: HOTSPOTS",
@@ -66,6 +69,8 @@ def test_required_sections():
         "## DEDUPLICATION",
         "## IGNORE LIST",
         "## SEVERITY THRESHOLD",
+        "## TARGET SCOPING",
+        "## BUSINESS LOGIC DISCOVERY",
         "## NOTIFICATIONS",
         "## INCREMENTAL INDEXING",
         "## PARALLEL MODE",
@@ -123,7 +128,7 @@ def test_scripts_exist():
     print("PASS: All scripts exist")
 
 
-def test_repo_audit_has_13_phases():
+def test_repo_audit_has_14_phases():
     import importlib.util
     spec = importlib.util.spec_from_file_location("repo_audit", REPO_AUDIT)
     mod = importlib.util.module_from_spec(spec)
@@ -136,15 +141,15 @@ def test_repo_audit_has_13_phases():
         state = mod.init_audit("test-13-phases", "/tmp/test")
 
         expected_phases = [
-            "1_recon", "2_dead_code", "3_hotspots", "4_dependency_issues",
+            "0_business_logic", "1_recon", "2_dead_code", "3_hotspots", "4_dependency_issues",
             "5_security_scan", "6_logic_bugs", "7_type_safety", "8_performance",
             "9_db_scan", "10_api_contract", "11_docker_scan", "12_regression",
             "13_write_test_cases",
         ]
         for phase in expected_phases:
             assert phase in state["phases"], f"Missing phase: {phase}"
-        assert len(state["phases"]) == 13, f"Expected 13 phases, got {len(state['phases'])}"
-        print("PASS: repo_audit.py has 13 phases")
+        assert len(state["phases"]) == 14, f"Expected 14 phases, got {len(state['phases'])}"
+        print("PASS: repo_audit.py has 14 phases")
     finally:
         shutil.rmtree(tmpdir)
 
@@ -285,7 +290,7 @@ def main():
         test_testrules_file_parses,
         test_testrules_required_sections,
         test_scripts_exist,
-        test_repo_audit_has_13_phases,
+        test_repo_audit_has_14_phases,
         test_repo_audit_dedup,
         test_repo_audit_ignore,
         test_repo_audit_snapshot_diff,
